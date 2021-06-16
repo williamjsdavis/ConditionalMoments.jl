@@ -1,8 +1,13 @@
 module ConditionalMoments
 
-# Write your package code here.
-include("testfun.jl")
-
 export my_fun
+
+export Observation
+
+
+include("testfun.jl")
+include("observations.jl")
+
+
 
 end
