@@ -1,0 +1,13 @@
+name = "ConditionalMoments"
+uuid = "03c0ca2e-d1a6-455a-a029-f6b6b0bf5d73"
+authors = ["William Davis"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
