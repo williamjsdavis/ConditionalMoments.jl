@@ -1,13 +1,6 @@
 using ConditionalMoments
 using Test
 
-@testset "First test functions" begin
-    @test my_fun(2,3) == 7
-    @test my_fun(2,4) == 8
-    @test my_fun(3,4) == 10
-    @test my_fun(10,10) == 30
-end
-
 ## Observations
 
 X = [1.,1.,4.,5.,6.,7]
