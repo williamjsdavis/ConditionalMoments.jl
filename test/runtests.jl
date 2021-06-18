@@ -3,7 +3,7 @@ using Test
 
 ## Observations
 
-const X = [1.,1.,4.,5.,6.,7]
+const X = [1.,1.,4.,5.,6.,7,1.,2.,4.,5.,6.,7,3.,1.,4.,5.,6.,7]
 const dt = 0.1
 const ob = Observation(X,dt)
 
@@ -13,7 +13,7 @@ const ob = Observation(X,dt)
     @test ob[(ob .> 3)'] == X[X .> 3]
     @test ob[:] == X
     @test ob.dt == dt
-    @test ob.npoints == 6
+    @test ob.npoints == 18
 
     @test_throws MethodError Observation([1.,1.,4.,5.,6.,7+2im],dt)
 end
@@ -21,7 +21,7 @@ end
 ## Moments
 
 const τ_indices = [1,3,4]
-const bin_edges = LinRange(-2,2,5)
+const bin_edges = LinRange(1.5,6.5,5)
 const histogramSettings = HistogramSettings(τ_indices,bin_edges)
 
 @testset "Moment settings" begin
@@ -34,11 +34,11 @@ end
 
 const moments = Moments(ob, histogramSettings)
 @testset "Moment calculations" begin
-    @test moments.observation.npoints == 6
+    @test moments.observation.npoints == 18
     @test size(moments.M1) == (3,4)
     @test size(moments.M2) == (3,4)
-    @test moments.M1[1,4] == 1.5
-    @test moments.M2[1,4] == 2.25
+    @test moments.M1[2,4] == -4.5
+    @test moments.M2[2,4] == 0.25
 end
 
 ## Larger test

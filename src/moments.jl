@@ -52,6 +52,7 @@ function build_moments(observation::Observation, settings::MomentSettings)
     return M1est, M2est, evaluation_points
 end
 
+# BUG: When bins have no entries they give NaN
 function get_moments(X, iX, tau)
     inc = X[iX .+ tau] .- X[iX]
     M1 = mean(inc)
