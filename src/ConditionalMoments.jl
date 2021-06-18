@@ -1,9 +1,8 @@
 module ConditionalMoments
 
 export Observation
-export MomentHistogramSettings
+export HistogramSettings
 export Moments
-export build_moments, make_grid
 
 using Statistics: mean
 

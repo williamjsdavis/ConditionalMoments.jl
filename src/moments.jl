@@ -1,22 +1,20 @@
 abstract type MomentSettings end
 
-#TODO: Rename MomentHistogramSettings to HistogramSettings
-
 "Moment calculation settings for histogram methods"
-struct MomentHistogramSettings{S<:Integer,T<:AbstractVector{S},S1<:Real,T1<:AbstractVector{S1}} <: MomentSettings
+struct HistogramSettings{S<:Integer,T<:AbstractVector{S},S1<:Real,T1<:AbstractVector{S1}} <: MomentSettings
     time_shift_sample_points::T
     bin_edges::T1
     n_time_points
     n_evaluation_points
 end
 
-function MomentHistogramSettings(time_shift_sample_points,bin_edges)
+function HistogramSettings(time_shift_sample_points,bin_edges)
     n_time_points = length(time_shift_sample_points)
     n_evaluation_points = length(bin_edges)
-    return MomentHistogramSettings(time_shift_sample_points,
-                                   bin_edges,
-                                   n_time_points,
-                                   n_evaluation_points)
+    return HistogramSettings(time_shift_sample_points,
+                             bin_edges,
+                             n_time_points,
+                             n_evaluation_points)
 end
 
 "Moments structure"

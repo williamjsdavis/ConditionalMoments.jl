@@ -18,17 +18,17 @@ end
 
 const τ_indices = [1,3,4]
 const bin_edges = LinRange(-2,2,5)
-const histogram_settings = MomentHistogramSettings(τ_indices,bin_edges)
+const histogramSettings = HistogramSettings(τ_indices,bin_edges)
 
 @testset "Moment settings" begin
-    @test histogram_settings.n_time_points == 3
-    @test histogram_settings.n_evaluation_points == 5
+    @test histogramSettings.n_time_points == 3
+    @test histogramSettings.n_evaluation_points == 5
 
-    @test_throws MethodError MomentHistogramSettings([1,2,3.1],bin_edges)
-    @test_throws MethodError MomentHistogramSettings([1,2,3+1im],bin_edges)
+    @test_throws MethodError HistogramSettings([1,2,3.1],bin_edges)
+    @test_throws MethodError HistogramSettings([1,2,3+1im],bin_edges)
 end
 
-const moments = Moments(ob, histogram_settings)
+const moments = Moments(ob, histogramSettings)
 @testset "Moment calculations" begin
     @test moments.observation.npoints == 6
     @test size(moments.M1) == ((3,4))
