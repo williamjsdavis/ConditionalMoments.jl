@@ -1,19 +1,22 @@
 abstract type MomentSettings end
 
+#TODO: Rename MomentHistogramSettings to HistogramSettings
+
 "Moment calculation settings for histogram methods"
-struct MomentHistogramSettings <: MomentSettings
-    time_shift_sample_points
-    bin_edges
+struct MomentHistogramSettings{S<:Integer,T<:AbstractVector{S},S1<:Real,T1<:AbstractVector{S1}} <: MomentSettings
+    time_shift_sample_points::T
+    bin_edges::T1
     n_time_points
     n_evaluation_points
-    function MomentHistogramSettings(time_shift_sample_points,bin_edges)
-        n_time_points = length(time_shift_sample_points)
-        n_evaluation_points = length(bin_edges)
-        return new(time_shift_sample_points,
-                   bin_edges,
-                   n_time_points,
-                   n_evaluation_points)
-    end
+end
+
+function MomentHistogramSettings(time_shift_sample_points,bin_edges)
+    n_time_points = length(time_shift_sample_points)
+    n_evaluation_points = length(bin_edges)
+    return MomentHistogramSettings(time_shift_sample_points,
+                                   bin_edges,
+                                   n_time_points,
+                                   n_evaluation_points)
 end
 
 "Moments structure"
@@ -23,13 +26,14 @@ struct Moments
     observation::Observation
     evaluation_points
     settings::MomentSettings
-    function Moments(observation,settings)
-        M1est, M2est, evaluation_points = build_moments(observation, settings)
-        return new(M1est,M2est,observation,evaluation_points,settings)
-    end
 end
 
-function make_grid(tau_vector,edge_vector::LinRange)
+function Moments(observation::Observation,settings::MomentSettings)
+    M1est, M2est, evaluation_points = build_moments(observation, settings)
+    return Moments(M1est,M2est,observation,evaluation_points,settings)
+end
+
+function make_grid(tau_vector::AbstractVector,edge_vector::LinRange)
     return broadcast((x,y)->(x,y),tau_vector,(1:edge_vector.lendiv)')
 end
 

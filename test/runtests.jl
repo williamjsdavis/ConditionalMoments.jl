@@ -3,9 +3,9 @@ using Test
 
 ## Observations
 
-X = [1.,1.,4.,5.,6.,7]
-dt = 0.1
-ob = Observation(X,dt)
+const X = [1.,1.,4.,5.,6.,7]
+const dt = 0.1
+const ob = Observation(X,dt)
 
 @testset "Observations" begin
     @test ob.dt == dt
@@ -14,16 +14,18 @@ end
 
 ## Moments
 
-τ_indices = [1,3,4]
-bin_edges = LinRange(-2,2,5)
-histogram_settings = MomentHistogramSettings(τ_indices,bin_edges)
+const τ_indices = [1,3,4]
+const bin_edges = LinRange(-2,2,5)
+const histogram_settings = MomentHistogramSettings(τ_indices,bin_edges)
 
 @testset "Moment settings" begin
     @test histogram_settings.n_time_points == 3
     @test histogram_settings.n_evaluation_points == 5
+    
+    @test_throws MethodError MomentHistogramSettings([1,2,3.1],bin_edges)
 end
 
-moments = Moments(ob, histogram_settings)
+const moments = Moments(ob, histogram_settings)
 @testset "Moment calculations" begin
     @test moments.observation.npoints == 6
     @test size(moments.M1) == ((3,4))
