@@ -8,6 +8,8 @@ const dt = 0.1
 const ob = Observation(X,dt)
 
 @testset "Observations" begin
+    @test ob[3] == 4.0
+    @test ob[:] == X
     @test ob.dt == dt
     @test ob.npoints == 6
 

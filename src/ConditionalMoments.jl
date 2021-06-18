@@ -6,6 +6,8 @@ export Moments
 
 using Statistics: mean
 
+import Base: size, getindex
+
 include("observations.jl")
 include("moments.jl")
 
