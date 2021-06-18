@@ -9,6 +9,8 @@ const ob = Observation(X,dt)
 
 @testset "Observations" begin
     @test ob[3] == 4.0
+    @test ob[ob .> 3] == X[X .> 3]
+    @test ob[(ob .> 3)'] == X[X .> 3]
     @test ob[:] == X
     @test ob.dt == dt
     @test ob.npoints == 6
