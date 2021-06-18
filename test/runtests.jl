@@ -37,6 +37,7 @@ const moments = Moments(ob, histogramSettings)
     @test moments.observation.npoints == 18
     @test size(moments.M1) == (3,4)
     @test size(moments.M2) == (3,4)
+    @test size(moments.errors) == (3,4)
     @test moments.M1[2,4] == -4.5
     @test moments.M2[2,4] == 0.25
 end
@@ -57,16 +58,18 @@ const ob = Observation(X,dt)
     @test ob.npoints == length(t)
 end
 
-const τ_indices = 1:20
-const τ_vec = dt*τ_indices
-const bin_edges = LinRange(-1,1,10)
-const histogramSettings = HistogramSettings(τ_indices,bin_edges)
-const moments = Moments(ob, histogramSettings)
+const τ_indices2 = 1:20
+const τ_vec = dt*τ_indices2
+const bin_edges2 = LinRange(-1,1,10)
+const histogramSettings2 = HistogramSettings(τ_indices2,bin_edges2)
+const moments = Moments(ob, histogramSettings2)
 
 const M1_τ = moments.M1 ./ τ_vec
+const M2_τ = moments.M2 ./ (2*τ_vec)
 
 @testset "Larger moments" begin
     @test moments.observation.npoints == length(t)
-    @test size(moments.M1) == (length(τ_indices),length(bin_edges)-1)
-    @test size(moments.M2) == (length(τ_indices),length(bin_edges)-1)
+    @test size(moments.M1) == (length(τ_indices2),length(bin_edges2)-1)
+    @test size(moments.M2) == (length(τ_indices2),length(bin_edges2)-1)
+    @test size(moments.errors) == (length(τ_indices2),length(bin_edges2)-1)
 end
