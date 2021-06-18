@@ -19,7 +19,12 @@ function WhiteNoiseProcess(moments::Moments,settings::InvertSettings)
     return WhiteNoiseProcess(drift,noise,errors,moments,settings)
 end
 
-function estimateProcess(moments::Moments,i::Integer;settings::InvertSettings)
+function WhiteNoiseProcess(moments::Moments,i::Integer=1,settings::InvertSettings)
+    drift, noise, errors = estimateProcess(moments,i)
+    return WhiteNoiseProcess(drift,noise,errors,moments,settings)
+end
+
+function estimateProcess(moments::Moments,i::Integer)
     τ_vector = moments.observation.dt * moments.evaluation_points
     drift = moments.M1[i,:] ./ τ_vector
     noise = moments.M2[i,:] ./ τ_vector

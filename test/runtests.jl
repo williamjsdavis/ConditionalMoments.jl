@@ -43,34 +43,30 @@ end
 
 ## Larger test
 
-function large_test()
-    t = 0:0.001:200
-    dt = t.step.hi
-    X = exp.(-t) .*
-        cumsum(exp.(t) .* (sqrt(dt)*pushfirst!(randn(length(t)-1),0)))
-    ob = Observation(X,dt)
+const t = 0:0.001:200
+const dt = t.step.hi
+const X = exp.(-t) .*
+    cumsum(exp.(t) .* (sqrt(dt)*pushfirst!(randn(length(t)-1),0)))
+const ob = Observation(X,dt)
 
-    @testset "Larger observation" begin
-        @test ob[ob .> 3] == X[X .> 3]
-        @test ob[(ob .> 3)'] == X[X .> 3]
-        @test ob[:] == X
-        @test ob.dt == dt
-        @test ob.npoints == length(t)
-    end
-
-    τ_indices = 1:20
-    τ_vec = dt*τ_indices
-    bin_edges = LinRange(-1,1,10)
-    histogramSettings = HistogramSettings(τ_indices,bin_edges)
-    moments = Moments(ob, histogramSettings)
-
-    M1_τ = moments.M1 ./ τ_vec
-
-    @testset "Larger moments" begin
-        @test moments.observation.npoints == length(t)
-        @test size(moments.M1) == (length(τ_indices),length(bin_edges)-1)
-        @test size(moments.M2) == (length(τ_indices),length(bin_edges)-1)
-    end
+@testset "Larger observation" begin
+    @test ob[ob .> 3] == X[X .> 3]
+    @test ob[(ob .> 3)'] == X[X .> 3]
+    @test ob[:] == X
+    @test ob.dt == dt
+    @test ob.npoints == length(t)
 end
 
-large_test()
+const τ_indices = 1:20
+const τ_vec = dt*τ_indices
+const bin_edges = LinRange(-1,1,10)
+const histogramSettings = HistogramSettings(τ_indices,bin_edges)
+const moments = Moments(ob, histogramSettings)
+
+const M1_τ = moments.M1 ./ τ_vec
+
+@testset "Larger moments" begin
+    @test moments.observation.npoints == length(t)
+    @test size(moments.M1) == (length(τ_indices),length(bin_edges)-1)
+    @test size(moments.M2) == (length(τ_indices),length(bin_edges)-1)
+end
