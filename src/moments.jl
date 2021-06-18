@@ -41,7 +41,6 @@ center(x::LinRange) = (x[1:end-1]+x[2:end])/2
 
 "Calculating moments with histograms"
 function build_moments(observation::Observation, settings::MomentSettings)
-
     ti_grid = make_grid(settings.time_shift_sample_points,
                         settings.bin_edges)
 

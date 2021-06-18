@@ -10,6 +10,8 @@ const ob = Observation(X,dt)
 @testset "Observations" begin
     @test ob.dt == dt
     @test ob.npoints == 6
+
+    @test_throws MethodError Observation([1.,1.,4.,5.,6.,7+2im],dt)
 end
 
 ## Moments
@@ -21,8 +23,9 @@ const histogram_settings = MomentHistogramSettings(τ_indices,bin_edges)
 @testset "Moment settings" begin
     @test histogram_settings.n_time_points == 3
     @test histogram_settings.n_evaluation_points == 5
-    
+
     @test_throws MethodError MomentHistogramSettings([1,2,3.1],bin_edges)
+    @test_throws MethodError MomentHistogramSettings([1,2,3+1im],bin_edges)
 end
 
 const moments = Moments(ob, histogram_settings)
