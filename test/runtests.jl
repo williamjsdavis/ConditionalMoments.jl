@@ -42,34 +42,71 @@ const moments = Moments(ob, histogramSettings)
     @test moments.M2[2,4] == 0.25
 end
 
+## Drift and noise functions
+
+const model1 = WhiteNoiseProcess(moments)
+const model2 = WhiteNoiseProcess(moments,i=2)
+
+@testset "Drift and noise calculations" begin
+    @test size(model1.drift) == (4,)
+    @test size(model1.noise) == (4,)
+    @test size(model1.errors) == (4,)
+    @test size(model2.drift) == (4,)
+    @test size(model2.noise) == (4,)
+    @test size(model2.errors) == (4,)
+    @test ~isnan(model1.drift[4])
+    @test ~isnan(model2.drift[4])
+    @test ~isnan(model1.noise[4])
+    @test ~isnan(model2.noise[4])
+end
+
 ## Larger test
 
 const t = 0:0.001:200
-const dt = t.step.hi
-const X = exp.(-t) .*
-    cumsum(exp.(t) .* (sqrt(dt)*pushfirst!(randn(length(t)-1),0)))
-const ob = Observation(X,dt)
+const dt_large = t.step.hi
+const X_large = exp.(-t) .*
+    cumsum(exp.(t) .* (sqrt(dt_large)*pushfirst!(randn(length(t)-1),0)))
+const ob_large = Observation(X_large,dt_large)
 
 @testset "Larger observation" begin
-    @test ob[ob .> 3] == X[X .> 3]
-    @test ob[(ob .> 3)'] == X[X .> 3]
-    @test ob[:] == X
-    @test ob.dt == dt
-    @test ob.npoints == length(t)
+    @test ob_large[ob_large .> 3] == X_large[X_large .> 3]
+    @test ob_large[(ob_large .> 3)'] == X_large[X_large .> 3]
+    @test ob_large[:] == X_large
+    @test ob_large.dt == dt_large
+    @test ob_large.npoints == length(t)
 end
 
-const τ_indices2 = 1:20
-const τ_vec = dt*τ_indices2
-const bin_edges2 = LinRange(-1,1,10)
-const histogramSettings2 = HistogramSettings(τ_indices2,bin_edges2)
-const moments = Moments(ob, histogramSettings2)
+const τ_indices_large = 1:20
+const τ_vec = dt_large*τ_indices_large
+const bin_edges_large = LinRange(-1,1,10)
+const histogramSettings_large =
+        HistogramSettings(τ_indices_large,bin_edges_large)
+const moments_large = Moments(ob_large, histogramSettings_large)
 
-const M1_τ = moments.M1 ./ τ_vec
-const M2_τ = moments.M2 ./ (2*τ_vec)
+const M1_τ = moments_large.M1 ./ τ_vec
+const M2_τ = moments_large.M2 ./ (2*τ_vec)
 
 @testset "Larger moments" begin
-    @test moments.observation.npoints == length(t)
-    @test size(moments.M1) == (length(τ_indices2),length(bin_edges2)-1)
-    @test size(moments.M2) == (length(τ_indices2),length(bin_edges2)-1)
-    @test size(moments.errors) == (length(τ_indices2),length(bin_edges2)-1)
+    @test moments_large.observation.npoints == length(t)
+    expected_size = (length(τ_indices_large),length(bin_edges_large)-1)
+    @test size(moments_large.M1) == expected_size
+    @test size(moments_large.M2) == expected_size
+    @test size(moments_large.errors) == expected_size
+end
+
+const model1_large = WhiteNoiseProcess(moments_large)
+const model2_large = WhiteNoiseProcess(moments_large,i=2)
+
+@testset "Larger drift and noise functions" begin
+    expected_length = length(bin_edges_large)-1
+    @test size(model1_large.drift) == (expected_length,)
+    @test size(model1_large.noise) == (expected_length,)
+    @test size(model1_large.errors) == (expected_length,)
+    @test size(model2_large.drift) == (expected_length,)
+    @test size(model2_large.noise) == (expected_length,)
+    @test size(model2_large.errors) == (expected_length,)
+    @test ~isnan(model1_large.drift[4])
+    @test ~isnan(model2_large.drift[4])
+    @test ~isnan(model1_large.noise[4])
+    @test ~isnan(model2_large.noise[4])
 end

@@ -26,6 +26,7 @@ struct Moments
     evaluation_points
     settings::MomentSettings
 end
+#NOTE: Make τ vector a field?
 
 function Moments(observation::Observation,settings::MomentSettings)
     M1est,M2est,errors,evaluation_points = build_moments(observation, settings)
