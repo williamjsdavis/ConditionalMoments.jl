@@ -79,6 +79,18 @@ ensemble_ob = EnsembleObservation(X_ensemble,dt)
     @test_throws MethodError Observation([1.,1.,4.,5.,6.,7+2im],dt)
 end
 
+## Ensemble moments
+
+const ensemble_moments = Moments(ensemble_ob, histogramSettings)
+@testset "Mapping moments" begin
+    @test ensemble_moments.observation.npoints == 18
+    @test ensemble_moments.observation.nsample == 2
+    @test size(ensemble_moments.M1) == (3,4)
+    @test size(ensemble_moments.M2) == (3,4)
+    #@test size(ensemble_moments.errors) == (3,4)
+    @test ensemble_moments.M1[2,4] == -4.5
+    @test ensemble_moments.M2[2,4] == 0.25
+end
 
 ## Larger test
 

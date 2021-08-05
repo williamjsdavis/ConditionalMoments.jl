@@ -22,15 +22,29 @@ struct Moments
     M1
     M2
     errors
-    observation::Observation
+    observation::Union{Observation,EnsembleObservation}
     evaluation_points
     settings::MomentSettings
 end
+#TODO: Add types
 #NOTE: Make τ vector a field?
+
+"Ensemble moments structure"
+struct EnsembleMoments
+    M1
+    M2
+end
 
 function Moments(observation::Observation,settings::MomentSettings)
     M1est,M2est,errors,evaluation_points = build_moments(observation, settings)
     return Moments(M1est,M2est,errors,observation,evaluation_points,settings)
+end
+
+function Moments(observation::EnsembleObservation,settings::MomentSettings)
+    M1est,M2est,errors,evaluation_points = build_moments(observation, settings)
+    M1mean = mean(M1est,dims=(:))
+    M2mean = mean(M2est,dims=(:))
+    return Moments(M1mean,M2mean,errors,observation,evaluation_points,settings)
 end
 
 function make_grid(tau_vector::AbstractVector,edge_vector::LinRange)
@@ -48,6 +62,23 @@ function build_moments(observation::Observation, settings::MomentSettings)
                                      settings.time_shift_sample_points,
                                      settings.bin_edges,
                                      ti_grid)
+
+    evaluation_points = center(settings.bin_edges)
+
+    return M1est, M2est, errors, evaluation_points
+end
+
+"Calculating ensemble moments with histograms"
+function build_moments(observation::EnsembleObservation, settings::MomentSettings)
+    ti_grid = make_grid(settings.time_shift_sample_points,
+                        settings.bin_edges)
+
+    M1est,M2est = moments_map(observation,
+                                     settings.time_shift_sample_points,
+                                     settings.bin_edges,
+                                     ti_grid)
+
+    errors = nothing
 
     evaluation_points = center(settings.bin_edges)
 
@@ -117,4 +148,8 @@ function moments_map(X::AbstractVector,tau_vector,edge_vector::LinRange,ti_grid)
     errors = broadcast(last,M1M2)
 
     return M1, M2, errors
+end
+function moments_map(ob::EnsembleObservation,tau_vector,edge_vector::LinRange,ti_grid)
+    moments = mapslices(y->moments_map(y,tau_vector,edge_vector,ti_grid),ob.X,dims=[1])
+    return first.(moments), getindex.(moments,2)
 end

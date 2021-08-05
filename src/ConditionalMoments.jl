@@ -7,6 +7,7 @@ export WhiteNoiseProcess
 export estimateProcess
 
 using Statistics: mean
+using SliceMap
 
 import Base: size, getindex
 
