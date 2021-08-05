@@ -60,6 +60,26 @@ const model2 = WhiteNoiseProcess(moments,i=2)
     @test ~isnan(model2.noise[4])
 end
 
+## Ensemble observations
+
+const X_ensemble = repeat(X,1,2)
+
+ensemble_ob = EnsembleObservation(X_ensemble,dt)
+
+@testset "Ensemble observations" begin
+    @test ensemble_ob[3] == 4.0
+    @test ensemble_ob[:,1] == X
+    @test ensemble_ob[:,2] == X
+    @test ensemble_ob[3,:] == [4.0,4.0]
+    @test ensemble_ob[:] == X_ensemble
+    @test ensemble_ob.dt == dt
+    @test ensemble_ob.npoints == 18
+    @test ensemble_ob.nsample == 2
+
+    @test_throws MethodError Observation([1.,1.,4.,5.,6.,7+2im],dt)
+end
+
+
 ## Larger test
 
 const t = 0:0.001:200

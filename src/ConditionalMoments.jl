@@ -1,6 +1,6 @@
 module ConditionalMoments
 
-export Observation
+export Observation, EnsembleObservation
 export HistogramSettings
 export Moments
 export WhiteNoiseProcess

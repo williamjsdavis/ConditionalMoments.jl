@@ -17,4 +17,25 @@ getindex(x::Observation, I::AbstractVector{Bool}) = x.X[findall(I)]
 getindex(x::Observation, I::AbstractArray{Bool}) = x.X[LinearIndices(I)[findall(I)]]
 getindex(x::Observation, ::Colon) = copy(x.X)
 
-#TODO: Add multiple observation data structure
+"Structure for ensemble observation"
+struct EnsembleObservation{S<:Real,T<:AbstractMatrix{S}} <: AbstractMatrix{S}
+    X::T
+    dt::S
+    npoints
+    nsample
+end
+
+EnsembleObservation(X,dt) = EnsembleObservation(X,dt,size(X,1),size(X,2))
+
+size(a::EnsembleObservation) = (a.npoints,a.nsample)
+
+function getindex(x::EnsembleObservation, i::Integer)
+    checkbounds(x, i)
+    return Base.getindex(x.X, i)
+end
+
+function getindex(x::EnsembleObservation, i::Integer, j::Integer)
+    checkbounds(x, i, j)
+    return Base.getindex(x.X, i, j)
+end
+getindex(x::EnsembleObservation, ::Colon) = copy(x.X)
