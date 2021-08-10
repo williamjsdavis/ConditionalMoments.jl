@@ -150,6 +150,8 @@ function moments_map(X::AbstractVector,tau_vector,edge_vector::LinRange,ti_grid)
     return M1, M2, errors
 end
 function moments_map(ob::EnsembleObservation,tau_vector,edge_vector::LinRange,ti_grid)
-    moments = mapslices(y->moments_map(y,tau_vector,edge_vector,ti_grid),ob.X,dims=[1])
-    return first.(moments), getindex.(moments,2)
+    moments = map(y->moments_map(y,tau_vector,edge_vector,ti_grid),eachcol(ob.X))
+    M1 = getindex.(moments,1)
+    M2 = getindex.(moments,2)
+    return M1, M2
 end

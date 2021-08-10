@@ -43,7 +43,7 @@ const moments = Moments(ob, histogramSettings)
 end
 
 ## Drift and noise functions
-
+#NOTE: Not type stable!
 const model1 = WhiteNoiseProcess(moments)
 const model2 = WhiteNoiseProcess(moments,i=2)
 
@@ -64,7 +64,7 @@ end
 
 const X_ensemble = repeat(X,1,2)
 
-ensemble_ob = EnsembleObservation(X_ensemble,dt)
+const ensemble_ob = EnsembleObservation(X_ensemble,dt)
 
 @testset "Ensemble observations" begin
     @test ensemble_ob[3] == 4.0
@@ -80,6 +80,7 @@ ensemble_ob = EnsembleObservation(X_ensemble,dt)
 end
 
 ## Ensemble moments
+#NOTE: Not type stable
 
 const ensemble_moments = Moments(ensemble_ob, histogramSettings)
 @testset "Mapping moments" begin
@@ -126,6 +127,7 @@ const M2_τ = moments_large.M2 ./ (2*τ_vec)
     @test size(moments_large.errors) == expected_size
 end
 
+#NOTE: Not type stable
 const model1_large = WhiteNoiseProcess(moments_large)
 const model2_large = WhiteNoiseProcess(moments_large,i=2)
 
