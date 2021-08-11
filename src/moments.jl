@@ -39,17 +39,10 @@ struct EnsembleMoments{T<:AbstractFloat}
     M2::Vector{Matrix{T}}
 end
 
-function MomentSolution(observation::Observation,settings::MomentSettings)
-    moments,errors = build_moments(observation, settings)
-    return MomentSolution(moments,
-                           errors,
-                           observation,
-                           center(settings.bin_edges),
-                           settings)
-end
-
-function MomentSolution(observation::EnsembleObservation,settings::MomentSettings)
-    moments,errors = build_moments(observation, settings)
+function MomentSolution(observation,settings::MomentSettings)
+    ti_grid = make_grid(settings.time_shift_sample_points,
+                        settings.bin_edges)
+    moments,errors = build_moments(observation, settings, ti_grid)
     return MomentSolution(moments,
                            errors,
                            observation,
@@ -64,10 +57,7 @@ end
 center(x::LinRange) = (x[1:end-1]+x[2:end])/2
 
 "Calculating moments with histograms"
-function build_moments(observation::Observation, settings::MomentSettings)
-    ti_grid = make_grid(settings.time_shift_sample_points,
-                        settings.bin_edges)
-
+function build_moments(observation::Observation, settings::MomentSettings, ti_grid)
     moments, errors = moments_map(observation.X,
                                    settings.time_shift_sample_points,
                                    settings.bin_edges,
@@ -76,10 +66,7 @@ function build_moments(observation::Observation, settings::MomentSettings)
 end
 
 "Calculating ensemble moments with histograms"
-function build_moments(observation::EnsembleObservation, settings::MomentSettings)
-    ti_grid = make_grid(settings.time_shift_sample_points,
-                        settings.bin_edges)
-
+function build_moments(observation::EnsembleObservation, settings::MomentSettings, ti_grid)
     ensembleMoments = moments_map(observation.X,
                                  settings.time_shift_sample_points,
                                  settings.bin_edges,
