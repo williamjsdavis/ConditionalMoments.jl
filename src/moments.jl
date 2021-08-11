@@ -17,11 +17,15 @@ function HistogramSettings(time_shift_sample_points,bin_edges)
                              n_evaluation_points)
 end
 
+struct Moments{T<:AbstractFloat}
+    M1::Matrix{T}
+    M2::Matrix{T}
+end
+
 "Moments structure"
-struct Moments
-    M1
-    M2
-    errors
+struct MomentSolution{T<:AbstractFloat}
+    moments::Moments{T}
+    errors::Union{Nothing,Matrix{T}}
     observation::Union{Observation,EnsembleObservation}
     evaluation_points
     settings::MomentSettings
@@ -30,21 +34,27 @@ end
 #NOTE: Make τ vector a field?
 
 "Ensemble moments structure"
-struct EnsembleMoments
-    M1
-    M2
+struct EnsembleMoments{T<:AbstractFloat}
+    M1::Vector{Matrix{T}}
+    M2::Vector{Matrix{T}}
 end
 
-function Moments(observation::Observation,settings::MomentSettings)
-    M1est,M2est,errors,evaluation_points = build_moments(observation, settings)
-    return Moments(M1est,M2est,errors,observation,evaluation_points,settings)
+function MomentSolution(observation::Observation,settings::MomentSettings)
+    moments,errors = build_moments(observation, settings)
+    return MomentSolution(moments,
+                           errors,
+                           observation,
+                           center(settings.bin_edges),
+                           settings)
 end
 
-function Moments(observation::EnsembleObservation,settings::MomentSettings)
-    M1est,M2est,errors,evaluation_points = build_moments(observation, settings)
-    M1mean = mean(M1est,dims=(:))
-    M2mean = mean(M2est,dims=(:))
-    return Moments(M1mean,M2mean,errors,observation,evaluation_points,settings)
+function MomentSolution(observation::EnsembleObservation,settings::MomentSettings)
+    moments,errors = build_moments(observation, settings)
+    return MomentSolution(moments,
+                           errors,
+                           observation,
+                           center(settings.bin_edges),
+                           settings)
 end
 
 function make_grid(tau_vector::AbstractVector,edge_vector::LinRange)
@@ -58,14 +68,11 @@ function build_moments(observation::Observation, settings::MomentSettings)
     ti_grid = make_grid(settings.time_shift_sample_points,
                         settings.bin_edges)
 
-    M1est,M2est,errors = moments_map(observation.X,
-                                     settings.time_shift_sample_points,
-                                     settings.bin_edges,
-                                     ti_grid)
-
-    evaluation_points = center(settings.bin_edges)
-
-    return M1est, M2est, errors, evaluation_points
+    moments, errors = moments_map(observation.X,
+                                   settings.time_shift_sample_points,
+                                   settings.bin_edges,
+                                   ti_grid)
+    return moments, errors
 end
 
 "Calculating ensemble moments with histograms"
@@ -73,16 +80,17 @@ function build_moments(observation::EnsembleObservation, settings::MomentSetting
     ti_grid = make_grid(settings.time_shift_sample_points,
                         settings.bin_edges)
 
-    M1est,M2est = moments_map(observation,
-                                     settings.time_shift_sample_points,
-                                     settings.bin_edges,
-                                     ti_grid)
+    ensembleMoments = moments_map(observation.X,
+                                 settings.time_shift_sample_points,
+                                 settings.bin_edges,
+                                 ti_grid)
 
     errors = nothing
 
-    evaluation_points = center(settings.bin_edges)
+    M1mean = mean(ensembleMoments.M1)
+    M2mean = mean(ensembleMoments.M2)
 
-    return M1est, M2est, errors, evaluation_points
+    return Moments(M1mean, M2mean), errors
 end
 
 # BUG: When bins have no entries they give NaN
@@ -147,11 +155,17 @@ function moments_map(X::AbstractVector,tau_vector,edge_vector::LinRange,ti_grid)
     M2 = broadcast(x->x[2],M1M2)
     errors = broadcast(last,M1M2)
 
-    return M1, M2, errors
+    return Moments(M1, M2), errors
 end
-function moments_map(ob::EnsembleObservation,tau_vector,edge_vector::LinRange,ti_grid)
-    moments = map(y->moments_map(y,tau_vector,edge_vector,ti_grid),eachcol(ob.X))
-    M1 = getindex.(moments,1)
-    M2 = getindex.(moments,2)
-    return M1, M2
+function moments_map(X::AbstractMatrix,tau_vector,edge_vector::LinRange,ti_grid)
+    #moments = EnsembleMoments(map(y->moments_map(y,tau_vector,edge_vector,ti_grid),eachcol(X)))
+
+    vecMoments = map(eachcol(X)) do y
+        moments_map(y,tau_vector,edge_vector,ti_grid)[1]
+    end
+    l = length(vecMoments)
+    #M1 = getindex.(moments,1)
+    #M2 = getindex.(moments,2)
+    return EnsembleMoments(map(x->vecMoments[x].M1,1:l),
+                           map(x->vecMoments[x].M2,1:l))
 end

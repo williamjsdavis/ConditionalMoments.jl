@@ -32,20 +32,20 @@ const histogramSettings = HistogramSettings(τ_indices,bin_edges)
     @test_throws MethodError HistogramSettings([1,2,3+1im],bin_edges)
 end
 
-const moments = Moments(ob, histogramSettings)
+const moment_sol = MomentSolution(ob, histogramSettings)
 @testset "Moment calculations" begin
-    @test moments.observation.npoints == 18
-    @test size(moments.M1) == (3,4)
-    @test size(moments.M2) == (3,4)
-    @test size(moments.errors) == (3,4)
-    @test moments.M1[2,4] == -4.5
-    @test moments.M2[2,4] == 0.25
+    @test moment_sol.observation.npoints == 18
+    @test size(moment_sol.moments.M1) == (3,4)
+    @test size(moment_sol.moments.M2) == (3,4)
+    @test size(moment_sol.errors) == (3,4)
+    @test moment_sol.moments.M1[2,4] == -4.5
+    @test moment_sol.moments.M2[2,4] == 0.25
 end
 
 ## Drift and noise functions
 #NOTE: Not type stable!
-const model1 = WhiteNoiseProcess(moments)
-const model2 = WhiteNoiseProcess(moments,i=2)
+const model1 = WhiteNoiseProcess(moment_sol)
+const model2 = WhiteNoiseProcess(moment_sol,i=2)
 
 @testset "Drift and noise calculations" begin
     @test size(model1.drift) == (4,)
@@ -82,15 +82,15 @@ end
 ## Ensemble moments
 #NOTE: Not type stable
 
-const ensemble_moments = Moments(ensemble_ob, histogramSettings)
+const ensemble_sol = MomentSolution(ensemble_ob, histogramSettings)
 @testset "Mapping moments" begin
-    @test ensemble_moments.observation.npoints == 18
-    @test ensemble_moments.observation.nsample == 2
-    @test size(ensemble_moments.M1) == (3,4)
-    @test size(ensemble_moments.M2) == (3,4)
+    @test ensemble_sol.observation.npoints == 18
+    @test ensemble_sol.observation.nsample == 2
+    @test size(ensemble_sol.moments.M1) == (3,4)
+    @test size(ensemble_sol.moments.M2) == (3,4)
     #@test size(ensemble_moments.errors) == (3,4)
-    @test ensemble_moments.M1[2,4] == -4.5
-    @test ensemble_moments.M2[2,4] == 0.25
+    @test ensemble_sol.moments.M1[2,4] == -4.5
+    @test ensemble_sol.moments.M2[2,4] == 0.25
 end
 
 ## Larger test
@@ -114,16 +114,16 @@ const τ_vec = dt_large*τ_indices_large
 const bin_edges_large = LinRange(-1,1,10)
 const histogramSettings_large =
         HistogramSettings(τ_indices_large,bin_edges_large)
-const moments_large = Moments(ob_large, histogramSettings_large)
+const moments_large = MomentSolution(ob_large, histogramSettings_large)
 
-const M1_τ = moments_large.M1 ./ τ_vec
-const M2_τ = moments_large.M2 ./ (2*τ_vec)
+const M1_τ = moments_large.moments.M1 ./ τ_vec
+const M2_τ = moments_large.moments.M2 ./ (2*τ_vec)
 
 @testset "Larger moments" begin
     @test moments_large.observation.npoints == length(t)
     expected_size = (length(τ_indices_large),length(bin_edges_large)-1)
-    @test size(moments_large.M1) == expected_size
-    @test size(moments_large.M2) == expected_size
+    @test size(moments_large.moments.M1) == expected_size
+    @test size(moments_large.moments.M2) == expected_size
     @test size(moments_large.errors) == expected_size
 end
 

@@ -12,7 +12,7 @@ struct WhiteNoiseProcess{S<:Real,T<:AbstractVector{S}}
     drift::T
     noise::T
     errors::T
-    moments::Moments
+    moments::MomentSolution
     settings::InvertSettings
 end
 
@@ -22,18 +22,18 @@ function WhiteNoiseProcess(moments::Moments,settings::InvertSettings)
     return WhiteNoiseProcess(drift,noise,errors,moments,settings)
 end
 
-function WhiteNoiseProcess(moments::Moments;
+function WhiteNoiseProcess(moment_sol::MomentSolution;
                            i::Integer=1,
                            settings::InvertSettings=InvertSettings())
-    drift, noise, errors = estimateProcess(moments,i)
-    return WhiteNoiseProcess(drift,noise,errors,moments,settings)
+    drift, noise, errors = estimateProcess(moment_sol,i)
+    return WhiteNoiseProcess(drift,noise,errors,moment_sol,settings)
 end
 
-function estimateProcess(moments::Moments,i::Integer)
-    τ_vector = moments.observation.dt *
-        moments.settings.time_shift_sample_points
-    drift = moments.M1[i,:] ./ τ_vector[i]
-    noise = moments.M2[i,:] ./ (2*τ_vector[i])
-    errors = moments.errors[i,:]
+function estimateProcess(moment_sol::MomentSolution,i::Integer)
+    τ_vector = moment_sol.observation.dt *
+        moment_sol.settings.time_shift_sample_points
+    drift = moment_sol.moments.M1[i,:] ./ τ_vector[i]
+    noise = moment_sol.moments.M2[i,:] ./ (2*τ_vector[i])
+    errors = moment_sol.errors[i,:]
     return drift, noise, errors
 end
