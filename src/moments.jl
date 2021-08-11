@@ -144,15 +144,13 @@ function moments_map(X::AbstractVector,tau_vector,edge_vector::LinRange,ti_grid)
 
     return Moments(M1, M2), errors
 end
-function moments_map(X::AbstractMatrix,tau_vector,edge_vector::LinRange,ti_grid)
-    #moments = EnsembleMoments(map(y->moments_map(y,tau_vector,edge_vector,ti_grid),eachcol(X)))
-
-    vecMoments = map(eachcol(X)) do y
+function moments_map(X::AbstractMatrix{T},tau_vector,edge_vector::LinRange,ti_grid) where T
+    #HACK: Do I need this explicit type declaration?
+    vecMoments::Vector{Moments{T}} = map(eachcol(X)) do y
         moments_map(y,tau_vector,edge_vector,ti_grid)[1]
     end
     l = length(vecMoments)
-    #M1 = getindex.(moments,1)
-    #M2 = getindex.(moments,2)
+
     return EnsembleMoments(map(x->vecMoments[x].M1,1:l),
                            map(x->vecMoments[x].M2,1:l))
 end

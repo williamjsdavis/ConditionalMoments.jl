@@ -43,7 +43,6 @@ const moment_sol = MomentSolution(ob, histogramSettings)
 end
 
 ## Drift and noise functions
-#NOTE: Not type stable!
 const model1 = WhiteNoiseProcess(moment_sol)
 const model2 = WhiteNoiseProcess(moment_sol,i=2)
 
@@ -80,7 +79,6 @@ const ensemble_ob = EnsembleObservation(X_ensemble,dt)
 end
 
 ## Ensemble moments
-#NOTE: Not type stable
 
 const ensemble_sol = MomentSolution(ensemble_ob, histogramSettings)
 @testset "Mapping moments" begin
