@@ -4,6 +4,7 @@ abstract type MomentSettings end
 struct HistogramSettings{S<:Integer,T<:AbstractVector{S},S1<:Real,T1<:AbstractVector{S1}} <: MomentSettings
     time_shift_sample_points::T
     bin_edges::T1
+    ti_grid
     n_time_points
     n_evaluation_points
 end
@@ -11,8 +12,11 @@ end
 function HistogramSettings(time_shift_sample_points,bin_edges)
     n_time_points = length(time_shift_sample_points)
     n_evaluation_points = length(bin_edges)
+    ti_grid = make_grid(time_shift_sample_points,
+                        bin_edges)
     return HistogramSettings(time_shift_sample_points,
                              bin_edges,
+                             ti_grid,
                              n_time_points,
                              n_evaluation_points)
 end
@@ -40,9 +44,8 @@ struct EnsembleMoments{T<:AbstractFloat}
 end
 
 function MomentSolution(observation,settings::MomentSettings)
-    ti_grid = make_grid(settings.time_shift_sample_points,
-                        settings.bin_edges)
-    moments,errors = build_moments(observation, settings, ti_grid)
+
+    moments,errors = build_moments(observation, settings)
     return MomentSolution(moments,
                            errors,
                            observation,
@@ -57,20 +60,21 @@ end
 center(x::LinRange) = (x[1:end-1]+x[2:end])/2
 
 "Calculating moments with histograms"
-function build_moments(observation::Observation, settings::MomentSettings, ti_grid)
+function build_moments(observation::Observation, settings::MomentSettings)
     moments, errors = moments_map(observation.X,
                                    settings.time_shift_sample_points,
                                    settings.bin_edges,
-                                   ti_grid)
+                                   settings.ti_grid)
+    errors = nothing
     return moments, errors
 end
 
 "Calculating ensemble moments with histograms"
-function build_moments(observation::EnsembleObservation, settings::MomentSettings, ti_grid)
+function build_moments(observation::EnsembleObservation, settings::MomentSettings)
     ensembleMoments = moments_map(observation.X,
                                  settings.time_shift_sample_points,
                                  settings.bin_edges,
-                                 ti_grid)
+                                 settings.ti_grid)
 
     errors = nothing
 
@@ -86,7 +90,8 @@ function get_moments(X, iX, tau)
     M1 = mean(inc)
     residuals = inc .- M1
     M2 = mean(residuals.^2)
-    KSerror = KS(residuals/(M2*sqrt(2)))
+    #KSerror = KS(residuals/(M2*sqrt(2)))
+    KSerror = nothing
     return M1, M2, KSerror
 end
 function KS(Y::AbstractArray{T}) where T
